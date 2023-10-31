@@ -1,2 +1,2 @@
 # simple-RAG
-A local RAG application that applies llamaindex。
+A local RAG application that applies llamaindex.
