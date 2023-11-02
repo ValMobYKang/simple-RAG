@@ -23,7 +23,21 @@ jobs:
           python-version: 3.9
 
       - name: Install dependencies
-        run: pip install flake8
+        run: pip install \
+              flake8==5.0.4 \
+              flake8-builtins==2.1.0 \
+              flake8-bugbear==22.12.6 \
+              flake8-coding==1.3.2 \
+              flake8-comprehensions==3.10.1 \
+              flake8-debugger==4.1.2 \
+              flake8-eradicate==1.4.0 \
+              flake8-executable==2.1.2 \
+              flake8-mutable==1.2.0 \
+              flake8-newspaper-style==0.4.3 \
+              flake8-pie==0.16.0 \
+              flake8-simplify==0.19.3`
 
       - name: Run Flake8
-        run: flake8
+        run: flake8 --doctests \
+              --ignore=A003,B011,C101,C408,E501,W503,PIE803 \
+              $(find . -name '*.py' -not -path './build/*' | cut -d '/' -f 2 | uniq)
