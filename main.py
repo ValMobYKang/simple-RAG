@@ -8,7 +8,7 @@ from llama_index import (
 )
 from llama_index.llms import OpenAI
 from llama_index.embeddings import HuggingFaceEmbedding
-from llama_index.node_parser import SimpleNodeParser, SentenceWindowNodeParser
+from llama_index.node_parser import SimpleNodeParser
 from llama_index.text_splitter import TokenTextSplitter
 from llama_hub.confluence.base import ConfluenceReader
 

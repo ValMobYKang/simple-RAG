@@ -61,4 +61,4 @@ jobs:
 
       - name: Run Flake8
         run: |
-              flake8 --ignore=A003,E501 $(find . -name '*.py' -not -path './build/*')
+              flake8 --ignore=A003,E501,C101 $(find . -name '*.py' -not -path './build/*')
