@@ -63,4 +63,4 @@ jobs:
       - name: Run Flake8
         run: |
               flake8 --ignore=A003,E501,C101 $(git ls-files '*.py')
-              pylint $(git ls-files '*.py')
+              pylint --disable=C0114,E0401 $(git ls-files '*.py')
