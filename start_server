@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+GPU=${1:-1} # 0 - cpu / 1 - gpu m1
+source .env
+
+if [ ! -f $MODEL ]; then
+    MODEL="./dolphin-2.1-mistral-7b.Q5_K_M.gguf"
+    echo "Model not found. Downloading now..."
+    wget "https://huggingface.co/TheBloke/dolphin-2.1-mistral-7B-GGUF/resolve/main/dolphin-2.1-mistral-7b.Q5_K_M.gguf" 
+fi
+
+if [ ! -d ".venv" ]; then
+    python3 -m venv .venv
+    source .venv/bin/activate
+    echo "Created .venv directory"
+
+    if [ $GPU -eq 1 ]; then
+        pip install llama-cpp-python
+    else
+        CMAKE_ARGS="-DLLAMA_METAL=on" pip install -U llama-cpp-python --no-cache-dir
+        pip install 'llama-cpp-python[server]'
+    fi
+    echo "Installed llama-cpp-python"
+fi
+  
+source .venv/bin/activate 
+
+python3 -m llama_cpp.server --model $MODEL --n_gpu_layers 1 --verbose False
