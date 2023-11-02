@@ -38,5 +38,6 @@ jobs:
               flake8-simplify==0.19.3
 
       - name: Run Flake8
-        run: flake8 --ignore=A003 \
-              $(find . -name '*.py' -not -path './build/*')
+        run: |
+          echo $(find . -name '*.py' -not -path './build/*')
+          flake8 --ignore=A003 $(find . -name '*.py' -not -path './build/*')
