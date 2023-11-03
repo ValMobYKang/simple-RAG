@@ -1,5 +1,5 @@
 import os
-
+import llama_index
 from llama_index import (
     VectorStoreIndex,
     ServiceContext,
@@ -14,6 +14,10 @@ from llama_hub.confluence.base import ConfluenceReader
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 os.environ["OPENAI_API_BASE"] = "http://localhost:8000/v1"
+import phoenix as px
+session = px.launch_app()
+llama_index.set_global_handler("arize_phoenix")
+
 
 llm = OpenAI(temperature=0.1, max_tokens=2048)
 embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
@@ -47,10 +51,9 @@ else:
     )
     index.storage_context.persist(persist_dir="store")
 
-query_engine = index.as_query_engine(similarity_top_k=5, response_mode="no_text")
+query_engine = index.as_query_engine(similarity_top_k=2, response_mode="compact")
 
 while 1:
     question = input("Question: ")
     answer = query_engine.query(question)
-    for node in answer.source_nodes:
-        print(f"{node.text} \n--------------------")
+

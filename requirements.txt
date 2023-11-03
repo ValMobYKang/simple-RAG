@@ -2,3 +2,4 @@ llama-index
 llama-hub
 transformers
 torch
+arize-phoenix[experimental]
