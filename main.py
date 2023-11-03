@@ -1,4 +1,5 @@
 import os
+import phoenix as px
 import llama_index
 from llama_index import (
     VectorStoreIndex,
@@ -7,6 +8,7 @@ from llama_index import (
     load_index_from_storage,
 )
 from llama_index.llms import OpenAI
+from llama_index.prompts import PromptTemplate
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.text_splitter import TokenTextSplitter
@@ -14,7 +16,7 @@ from llama_hub.confluence.base import ConfluenceReader
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 os.environ["OPENAI_API_BASE"] = "http://localhost:8000/v1"
-import phoenix as px
+
 session = px.launch_app()
 llama_index.set_global_handler("arize_phoenix")
 
@@ -32,7 +34,7 @@ else:
         documents=ConfluenceReader(base_url=os.environ["CONFLUENCE_URL"]).load_data(
             space_key=os.environ["CONFLUENCE_SPACE"],
             page_status="current",
-            include_attachments=False,
+            include_attachments=True,
             max_num_results=10,
         ),
         service_context=ServiceContext.from_defaults(
@@ -51,9 +53,21 @@ else:
     )
     index.storage_context.persist(persist_dir="store")
 
-query_engine = index.as_query_engine(similarity_top_k=2, response_mode="compact")
+query_engine = index.as_query_engine(
+    similarity_top_k=2, 
+    response_mode="compact",
+    text_qa_template=PromptTemplate(
+        "<|im_start|>system \n"
+        "Given the context information and no prior knowledge, answer the query. If you dont know the answer, reply 'I dont know!' without any further content.<|im_end|> \n"
+        "Context information is below. \n"
+        "---------------------\n{context_str}\n---------------------\n"
+        "<|im_start|>user \n"
+        "{query_str}<|im_end|> \n"
+        "<|im_start|>assistant"
+        ),
+    )
 
 while 1:
     question = input("Question: ")
-    answer = query_engine.query(question)
-
+    print(query_engine.query(question))
+    

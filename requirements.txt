@@ -2,4 +2,8 @@ llama-index
 llama-hub
 transformers
 torch
+pytesseract
+Pillow
+pytesseract 
+pdf2image
 arize-phoenix[experimental]
