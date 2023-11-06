@@ -12,7 +12,8 @@ from llama_index.prompts import PromptTemplate
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.text_splitter import TokenTextSplitter
-from llama_hub.confluence.base import ConfluenceReader
+# from llama_hub.confluence.base import ConfluenceReader
+from utils import ConfluenceReader
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 os.environ["OPENAI_API_BASE"] = "http://localhost:8000/v1"
@@ -58,7 +59,7 @@ query_engine = index.as_query_engine(
     response_mode="compact",
     text_qa_template=PromptTemplate(
         "<|im_start|>system \n"
-        "Given the context information and no prior knowledge, answer the query. If you dont know the answer, reply 'I dont know!' without any further content.<|im_end|> \n"
+        "Given the context information and no prior knowledge, answer the query. If you dont know the answer, reply 'I dont know!' without any further content. This is very important to my career.<|im_end|> \n"
         "Context information is below. \n"
         "---------------------\n{context_str}\n---------------------\n"
         "<|im_start|>user \n"
