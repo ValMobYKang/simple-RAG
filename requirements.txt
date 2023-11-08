@@ -4,6 +4,8 @@ transformers
 torch
 pytesseract
 Pillow
-pytesseract 
 pdf2image
 arize-phoenix[experimental]
+docx2txt
+xlrd
+svglib
