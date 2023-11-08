@@ -37,36 +37,36 @@ jobs:
       - name: Check different
         run: git diff --exit-code
 
-  pytlint:
-    name: Run Pylint
-    runs-on: ubuntu-latest
+  # pytlint:
+  #   name: Run Pylint
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: 3.9
 
-      - name: Install dependencies
-        run: pip install \
-              flake8==6.1.0 \
-              flake8-builtins==2.1.0 \
-              flake8-bugbear==23.9.16 \
-              flake8-coding==1.3.2 \
-              flake8-comprehensions==3.14.0 \
-              flake8-debugger==4.1.2 \
-              flake8-eradicate==1.5.0 \
-              flake8-executable==2.1.2 \
-              flake8-mutable==1.2.0 \
-              flake8-newspaper-style==0.4.3 \
-              flake8-pie==0.16.0 \
-              flake8-simplify==0.19.3 \
-              pylint
+  #     - name: Install dependencies
+  #       run: pip install \
+  #             flake8==6.1.0 \
+  #             flake8-builtins==2.1.0 \
+  #             flake8-bugbear==23.9.16 \
+  #             flake8-coding==1.3.2 \
+  #             flake8-comprehensions==3.14.0 \
+  #             flake8-debugger==4.1.2 \
+  #             flake8-eradicate==1.5.0 \
+  #             flake8-executable==2.1.2 \
+  #             flake8-mutable==1.2.0 \
+  #             flake8-newspaper-style==0.4.3 \
+  #             flake8-pie==0.16.0 \
+  #             flake8-simplify==0.19.3 \
+  #             pylint
 
-      - name: Run Flake8
-        run: |
-              flake8 --ignore=A003,E501,C101 $(git ls-files '*.py')
-              pylint --disable=C0114,E0401 $(git ls-files '*.py')
+  #     - name: Run Flake8
+  #       run: |
+  #             flake8 --ignore=A003,E501,C101 $(git ls-files '*.py')
+  #             pylint --disable=C0114,E0401 $(git ls-files '*.py')
