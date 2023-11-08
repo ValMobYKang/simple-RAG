@@ -4,8 +4,11 @@ import requests
 from functools import lru_cache
 from llama_hub.confluence.base import ConfluenceReader as BaseConfluenceReader
 
+
 class ConfluenceReader(BaseConfluenceReader):
-    def __init__(self, base_url: str = None, oauth2: Dict | None = None, cloud: bool = True) -> None:
+    def __init__(
+        self, base_url: str = None, oauth2: Dict | None = None, cloud: bool = True
+    ) -> None:
         super().__init__(base_url, oauth2, cloud)
 
     def process_pdf(self, link):
@@ -18,9 +21,6 @@ class ConfluenceReader(BaseConfluenceReader):
                 " install pytesseract pdf2image`"
             )
 
-        import pytesseract  # type: ignore
-        from pdf2image import convert_from_bytes  # type: ignore
-        
         response = self.confluence.request(path=link, absolute=True)
         text = ""
         if (
@@ -151,17 +151,17 @@ class ConfluenceReader(BaseConfluenceReader):
         return pytesseract.image_to_string(image)
 
 
-
 def cookie_request(path, absolute):
     assert absolute
     return requests.get(path, cookies=parse_cookie())
 
+
 @lru_cache
 def parse_cookie(cookie_file="./cookies.txt"):
     cookies = {}
-    with open (cookie_file, 'r') as fp:
+    with open(cookie_file, "r") as fp:
         for line in fp:
-            if not re.match(r'^\#', line):
-                line_fields = line.strip().split('\t')
+            if not re.match(r"^\#", line):
+                line_fields = line.strip().split("\t")
                 cookies[line_fields[5]] = line_fields[6]
     return cookies

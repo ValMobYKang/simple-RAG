@@ -12,6 +12,7 @@ from llama_index.prompts import PromptTemplate
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.text_splitter import TokenTextSplitter
+
 # from llama_hub.confluence.base import ConfluenceReader
 from utils import ConfluenceReader
 
@@ -55,7 +56,7 @@ else:
     index.storage_context.persist(persist_dir="store")
 
 query_engine = index.as_query_engine(
-    similarity_top_k=2, 
+    similarity_top_k=2,
     response_mode="compact",
     text_qa_template=PromptTemplate(
         "<|im_start|>system \n"
@@ -65,10 +66,9 @@ query_engine = index.as_query_engine(
         "<|im_start|>user \n"
         "{query_str}<|im_end|> \n"
         "<|im_start|>assistant"
-        ),
-    )
+    ),
+)
 
 while 1:
     question = input("Question: ")
     print(query_engine.query(question))
-    

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+repo_name=pipelinecomponents/ruff
+
+if ! docker images --format "{{.Repository}}" | grep -q ${repo_name}; then
+    docker pull ${repo_name}
+fi
+
+docker run --rm -v $(pwd):/code pipelinecomponents/ruff ruff check .
