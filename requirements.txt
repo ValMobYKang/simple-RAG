@@ -9,3 +9,6 @@ arize-phoenix[experimental]
 docx2txt
 xlrd
 svglib
+streamlit
+watchdog
+streamlit-authenticator
