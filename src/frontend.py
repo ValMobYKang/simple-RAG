@@ -1,6 +1,6 @@
 import streamlit as st
-
 from backend import get_query_engine, init_index
+query_engine = get_query_engine(init_index())
 
 st.set_page_config(
     page_title="Chat with the Streamlit docs, powered by LlamaIndex",
@@ -13,9 +13,6 @@ st.title("Chat with MXX Mate")
 st.info("Alpha Version", icon="📃")
 
 
-query_engine = get_query_engine(init_index())
-
-
 def get_response(query):
     with st.spinner(text="Thinking ..."):
         st.markdown(query_engine.query(query).response)
@@ -26,4 +23,3 @@ with st.form("my_form"):
     submitted = st.form_submit_button("Ask")
     if submitted:
         get_response(text)
-

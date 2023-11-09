@@ -163,3 +163,4 @@ cython_debug/
 # data 
 store/
 *cookies.txt
+auth.yaml
