@@ -12,15 +12,15 @@ from llama_index.prompts import PromptTemplate
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.text_splitter import TokenTextSplitter
-
+from llama_index.indices.prompt_helper import PromptHelper
 # from llama_hub.confluence.base import ConfluenceReader
 from utils import ConfluenceReader
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 os.environ["OPENAI_API_BASE"] = "http://localhost:8000/v1"
 
-llm = OpenAI(temperature=0.1, max_tokens=2048)
-embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
+LLM = OpenAI(temperature=0.1, max_tokens=2048)
+EMBEDDING = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
 
 
 def init_index():
@@ -28,7 +28,9 @@ def init_index():
         index = load_index_from_storage(
             storage_context=StorageContext.from_defaults(persist_dir="store"),
             service_context=ServiceContext.from_defaults(
-                llm=llm, embed_model=embed_model
+                llm=LLM, 
+                embed_model=EMBEDDING,
+                prompt_helper=PromptHelper(chunk_size_limit=2000)
             ),
         )
     else:
@@ -40,7 +42,7 @@ def init_index():
                 max_num_results=10,
             ),
             service_context=ServiceContext.from_defaults(
-                llm=llm,
+                llm=LLM,
                 node_parser=SimpleNodeParser.from_defaults(
                     text_splitter=TokenTextSplitter(
                         separator=" ",
@@ -49,7 +51,7 @@ def init_index():
                         backup_separators=["\n"],
                     )
                 ),
-                embed_model=embed_model,
+                embed_model=EMBEDDING,
             ),
             show_progress=True,
         )
