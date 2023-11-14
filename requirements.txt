@@ -12,3 +12,4 @@ svglib
 streamlit
 watchdog
 streamlit-authenticator
+sentence-transformers
