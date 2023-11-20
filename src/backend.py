@@ -13,24 +13,26 @@ from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.text_splitter import TokenTextSplitter
 from llama_index.indices.prompt_helper import PromptHelper
-from llama_index.indices.postprocessor import SentenceTransformerRerank
-from utils import ConfluenceReader
+from utils import ConfluenceReader, SentenceTransformerRerank
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 os.environ["OPENAI_API_BASE"] = "http://localhost:8000/v1"
 
 LLM = OpenAI(temperature=0.1, max_tokens=2048)
 EMBEDDING = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
-RERANK = SentenceTransformerRerank(model="cross-encoder/ms-marco-MiniLM-L-2-v2", top_n=3)
+RERANK = SentenceTransformerRerank(
+    model="cross-encoder/ms-marco-MiniLM-L-2-v2", top_n=3
+)
+
 
 def init_index():
     if os.path.exists("store"):
         index = load_index_from_storage(
             storage_context=StorageContext.from_defaults(persist_dir="store"),
             service_context=ServiceContext.from_defaults(
-                llm=LLM, 
+                llm=LLM,
                 embed_model=EMBEDDING,
-                prompt_helper=PromptHelper(chunk_size_limit=2000)
+                prompt_helper=PromptHelper(chunk_size_limit=2000),
             ),
         )
     else:
@@ -66,14 +68,16 @@ def get_query_engine(index):
         node_postprocessors=[RERANK],
         text_qa_template=PromptTemplate(
             "<|im_start|>system \n"
-            "Given the context information and no prior knowledge, answer the query. If you dont know the answer, reply 'I dont know!' without any further content. This is very important to my career.<|im_end|> \n"
-            "Context information is below. \n"
+            "You will be presented with context. You task is to answer the query only based on the context. "
+            "If the context cannot answer the query, you responses 'I don't know'. \n"
+            "Approach this task step-by-step, take your time. \n"
+            "This is very important to my career.<|im_end|>\n"
+            "The Context information is below. \n"
             "---------------------\n{context_str}\n---------------------\n"
             "<|im_start|>user \n"
             "{query_str}<|im_end|> \n"
             "<|im_start|>assistant"
         ),
-        
     )
 
 

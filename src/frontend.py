@@ -1,5 +1,6 @@
 import streamlit as st
 from backend import get_query_engine, init_index
+
 query_engine = get_query_engine(init_index())
 
 st.set_page_config(
