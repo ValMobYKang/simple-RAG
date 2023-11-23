@@ -25,8 +25,34 @@ RERANK = SentenceTransformerRerank(
 )
 
 
-def init_index():
-    if os.path.exists("store"):
+def init_index(persist_dir: Literal["confluence_store", "bitbucket_store"]):
+    if persist_dir == "bitbucket_store":
+        loader = BitbucketReader(
+            project_key="MOBDATA",
+            base_url="https://bitbucket.valtech.de",
+            branch="master",
+            extensions_to_skip=[
+                ".VIN-decoding",
+                "URL-generalization",
+                "scraping",
+                "FizzBuzz",
+                "Driver-Behaviour",
+                "VIN-OCR",
+                "Sensor-Log",
+                "png",
+                "jpg",
+                "ppm",
+            ],
+        )
+    elif persist_dir == "confluence_store":
+        loader = ConfluenceReader(base_url=os.environ["CONFLUENCE_URL"]).load_data(
+            space_key=os.environ["CONFLUENCE_SPACE"],
+            page_status="current",
+            include_attachments=False,
+            max_num_results=10,
+        )
+
+    if os.path.exists(persist_dir):
         index = load_index_from_storage(
             storage_context=StorageContext.from_defaults(persist_dir="store"),
             service_context=ServiceContext.from_defaults(
@@ -61,12 +87,12 @@ def init_index():
     return index
 
 
-def get_query_engine(index):
-    return index.as_query_engine(
-        similarity_top_k=5,
-        response_mode="compact",
-        node_postprocessors=[RERANK],
-        text_qa_template=PromptTemplate(
+def get_query_engine(indices):
+    config = {
+        "similarity_top_k": 5,
+        "response_mode": "compact",
+        "node_postprocessors": [RERANK],
+        "text_qa_template": PromptTemplate(
             "<|im_start|>system \n"
             "You will be presented with context. You task is to answer the query only based on the context. "
             "If the context cannot answer the query, you responses 'I don't know'. \n"
@@ -78,14 +104,44 @@ def get_query_engine(index):
             "{query_str}<|im_end|> \n"
             "<|im_start|>assistant"
         ),
-    )
+    }
+    if len(indices) == 1:
+        print("[Load Single Query Engine]")
+        return indices[0].as_query_engine(
+            similarity_top_k=config["similarity_top_k"],
+            response_mode=config["response_mode"],
+            node_postprocessors=config["node_postprocessors"],
+            text_qa_template=config["text_qa_template"],
+        )
+    elif len(indices) > 1:
+        engines = []
+        for index in indices:
+            engines.append(
+                QueryEngineTool.from_defaults(
+                    query_engine=index.as_query_engine(
+                        similarity_top_k=config["similarity_top_k"],
+                        response_mode=config["response_mode"],
+                        node_postprocessors=config["node_postprocessors"],
+                        text_qa_template=config["text_qa_template"],
+                    ),
+                    description=(f"Retrieve data from {index.__name__}"),
+                )
+            )
+        return RouterQueryEngine(
+            selector=EmbeddingSingleSelector.from_defaults(), query_engine_tools=engines
+        )
+    else:
+        raise IndexError("It must contain one or more indices.")
 
 
 if __name__ == "__main__":
     session = px.launch_app()
     llama_index.set_global_handler("arize_phoenix")
 
-    query_engine = get_query_engine(index=init_index())
+    bitbucket_index = init_index(persist_dir="bitbucket_store")
+    conflunence_index = init_index(persist_dir="confluence_store")
+
+    query_engine = get_query_engine(indices=[conflunence_index, bitbucket_index])
     print("[Develop mode]")
     while 1:
         question = input("Question: ")
