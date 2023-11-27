@@ -13,7 +13,11 @@ from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.text_splitter import TokenTextSplitter
 from llama_index.indices.prompt_helper import PromptHelper
-from utils import ConfluenceReader, SentenceTransformerRerank
+from llama_index.query_engine.router_query_engine import RouterQueryEngine
+from llama_index.tools.query_engine import QueryEngineTool
+from llama_index.selectors import EmbeddingSingleSelector 
+from typing import Literal
+from utils import ConfluenceReader, SentenceTransformerRerank, BitbucketReader
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 os.environ["OPENAI_API_BASE"] = "http://localhost:8000/v1"
@@ -28,8 +32,8 @@ RERANK = SentenceTransformerRerank(
 def init_index(persist_dir: Literal["confluence_store", "bitbucket_store"]):
     if persist_dir == "bitbucket_store":
         loader = BitbucketReader(
-            project_key="MOBDATA",
-            base_url="https://bitbucket.valtech.de",
+            project_key=os.environ['BITBUCKET_PROJECT'],
+            base_url=os.environ['BITBUCKET_URL'], 
             branch="master",
             extensions_to_skip=[
                 ".VIN-decoding",
@@ -51,10 +55,12 @@ def init_index(persist_dir: Literal["confluence_store", "bitbucket_store"]):
             include_attachments=False,
             max_num_results=10,
         )
-
+    else:
+        raise Exception("Must have one store")
+    
     if os.path.exists(persist_dir):
         index = load_index_from_storage(
-            storage_context=StorageContext.from_defaults(persist_dir="store"),
+            storage_context=StorageContext.from_defaults(persist_dir=persist_dir),
             service_context=ServiceContext.from_defaults(
                 llm=LLM,
                 embed_model=EMBEDDING,
@@ -63,12 +69,7 @@ def init_index(persist_dir: Literal["confluence_store", "bitbucket_store"]):
         )
     else:
         index = VectorStoreIndex.from_documents(
-            documents=ConfluenceReader(base_url=os.environ["CONFLUENCE_URL"]).load_data(
-                space_key=os.environ["CONFLUENCE_SPACE"],
-                page_status="current",
-                include_attachments=False,
-                max_num_results=10,
-            ),
+            documents=loader,
             service_context=ServiceContext.from_defaults(
                 llm=LLM,
                 node_parser=SimpleNodeParser.from_defaults(
@@ -84,6 +85,8 @@ def init_index(persist_dir: Literal["confluence_store", "bitbucket_store"]):
             show_progress=True,
         )
         index.storage_context.persist(persist_dir="store")
+    
+    index.__name__ = persist_dir
     return index
 
 
@@ -94,12 +97,12 @@ def get_query_engine(indices):
         "node_postprocessors": [RERANK],
         "text_qa_template": PromptTemplate(
             "<|im_start|>system \n"
-            "You will be presented with context. You task is to answer the query only based on the context. "
-            "If the context cannot answer the query, you responses 'I don't know'. \n"
-            "Approach this task step-by-step, take your time. \n"
-            "This is very important to my career.<|im_end|>\n"
+            "You will be presented with context. Your task is to answer the query only based on the context. "
+            "If the context cannot answer the query, you responses 'I don't know' directly without any more responses. \n"
+            "Approach this task step-by-step, take your time. "
+            "This is very important to my career.\n"
             "The Context information is below. \n"
-            "---------------------\n{context_str}\n---------------------\n"
+            "---------------------\n{context_str}\n--------------------- <|im_end|>\n"
             "<|im_start|>user \n"
             "{query_str}<|im_end|> \n"
             "<|im_start|>assistant"
@@ -139,10 +142,14 @@ if __name__ == "__main__":
     llama_index.set_global_handler("arize_phoenix")
 
     bitbucket_index = init_index(persist_dir="bitbucket_store")
-    conflunence_index = init_index(persist_dir="confluence_store")
+    confluence_index = init_index(persist_dir="confluence_store")
 
-    query_engine = get_query_engine(indices=[conflunence_index, bitbucket_index])
+    query_engine_bitbucket = get_query_engine(indices=[bitbucket_index])
+    # query_engine_confluence = get_query_engine(indices=[confluence_index])
+
     print("[Develop mode]")
     while 1:
         question = input("Question: ")
-        print(query_engine.query(question))
+        print(query_engine_bitbucket.query(question))
+        # print(query_engine_confluence.query(question))
+        # response = embedding_compare(answer_from_bitbucket, answer_from_confluence, question)
