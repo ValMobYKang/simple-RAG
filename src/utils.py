@@ -16,11 +16,13 @@ from dataclasses import dataclass
 from llama_index.readers.base import BaseReader
 from llama_index.readers.schema.base import Document
 
+
 @dataclass
 class File:
     content: str
     file_name: str
     url: str
+
 
 class SentenceTransformerRerank(BaseSentenceTransformerRerank):
     def __init__(
@@ -332,9 +334,7 @@ class BitbucketReader(BaseReader):
             "at": branch,
         }
         headers = self.get_headers()
-        # print(content_url)  # DEBUG
         response = requests.get(content_url, headers=headers, params=query_params)
-        # print(file_path)  # DEBUG
         children = response.json()
         if "errors" in children:
             # raise ValueError(children["errors"]) # DEBUG
@@ -378,8 +378,8 @@ class BitbucketReader(BaseReader):
             self.load_all_file_paths(
                 slug=slug, branch=self.branch, directory_path="", paths=paths
             )
+        print(len(paths))
         texts = self.load_text(paths)
-        print(len(texts))
         return [
             Document(
                 text=text.content,
@@ -402,8 +402,8 @@ def test_bitbucketReader():
             "Driver-Behaviour",
             "VIN-OCR",
             "Sensor-Log",
-            ".png",
-            ".jpg",
+            "png",
+            "jpg",
         ],
     )
 
