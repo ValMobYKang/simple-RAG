@@ -12,6 +12,7 @@ from llama_index import (
     VectorStoreIndex,
 )
 
+
 @dataclass
 class File:
     content: str
@@ -187,13 +188,15 @@ class BitbucketReader(BaseReader):
 if __name__ == "__main__":
     print("Start to load bitbucket store ...")
     for param in [
-            "BITBUCKET_PROJECT",
-            "BITBUCKET_URL",
-            "BITBUCKET_USERNAME",
-            "BITBUCKET_API_KEY",
-        ]: 
-        assert os.environ.get(param) != None, f"{param} environment variables is not defined"
- 
+        "BITBUCKET_PROJECT",
+        "BITBUCKET_URL",
+        "BITBUCKET_USERNAME",
+        "BITBUCKET_API_KEY",
+    ]:
+        assert (
+            os.environ.get(param) != None
+        ), f"{param} environment variables is not defined"
+
     index = VectorStoreIndex.from_documents(
         documents=BitbucketReader(
             project_key=os.environ["BITBUCKET_PROJECT"],
@@ -216,7 +219,11 @@ if __name__ == "__main__":
             llm=None,
             chunk_size=512,
             chunk_overlap=20,
-            embed_model=HuggingFaceEmbedding(model_name="/embedding_model" if os.path.exists("/embedding_model") else "BAAI/bge-small-en-v1.5"), 
+            embed_model=HuggingFaceEmbedding(
+                model_name="/embedding_model"
+                if os.path.exists("/embedding_model")
+                else "BAAI/bge-small-en-v1.5"
+            ),
         ),
         show_progress=True,
     )
