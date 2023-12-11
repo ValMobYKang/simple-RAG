@@ -24,7 +24,7 @@ from phoenix.trace.llama_index import (
     OpenInferenceTraceCallbackHandler,
 )
 
-from typing import Literal, List
+from typing import Literal
 from utils import ConfluenceReader, SentenceTransformerRerank, BitbucketReader
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"

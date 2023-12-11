@@ -8,7 +8,7 @@ from llama_hub.confluence.base import ConfluenceReader as BaseConfluenceReader
 from llama_index.indices.postprocessor import (
     SentenceTransformerRerank as BaseSentenceTransformerRerank,
 )
-from typing import List, Optional, Literal
+from typing import List, Optional
 from llama_index.callbacks import CBEventType, EventPayload
 from llama_index.schema import MetadataMode, NodeWithScore, QueryBundle
 from dataclasses import dataclass
