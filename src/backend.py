@@ -10,7 +10,7 @@ from llama_index.prompts import PromptTemplate
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index.indices.prompt_helper import PromptHelper
 from llama_index.query_engine import CustomQueryEngine
-from llama_index.retrievers import BaseRetriever
+from llama_index.retrievers import BaseRetriever, BM25Retriever
 from llama_index.response_synthesizers import (
     get_response_synthesizer,
     BaseSynthesizer,
@@ -70,7 +70,7 @@ def service_context():
 
 def init_index(persist_dir: Literal["confluence_store", "bitbucket_store"]):
     if os.path.exists(persist_dir):
-        print(f"Loading {persist_dir} ...")
+        print(f"... Loading {persist_dir}")
         return load_index_from_storage(
             storage_context=StorageContext.from_defaults(persist_dir=persist_dir),
             service_context=service_context(),
@@ -141,8 +141,15 @@ def get_query_engine(indices: list):
             text_qa_template=dolphin_qa_prompt,
         )
 
+    retrievers = []
+    for index in indices:
+        retriever = BM25Retriever.from_defaults(index=index, similarity_top_k=5)
+        retriever.callback_manager = cb_manager
+        retrievers.append(retriever)
+
     return QueryMultiEngine(
-        retrievers=[index.as_retriever(similarity_top_k=5) for index in indices],
+        retrievers=[index.as_retriever(similarity_top_k=5) for index in indices]
+        + retrievers,
         node_postprocessors=[RERANK],
         response_synthesizer=get_response_synthesizer(
             service_context=service_context(),
