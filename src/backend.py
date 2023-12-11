@@ -31,15 +31,15 @@ os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 os.environ["OPENAI_API_BASE"] = "http://localhost:8000/v1"
 
 session = px.launch_app()
-callback_handler = OpenInferenceTraceCallbackHandler()
-cb_manager = CallbackManager(handlers=[callback_handler])
+cb_manager = CallbackManager(handlers=[OpenInferenceTraceCallbackHandler()])
 
 
 LLM = OpenAI(temperature=0.1, max_tokens=2048, callback_manager=cb_manager)
-EMBEDDING = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
+EMBEDDING = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5", callback_manager=cb_manager)
 RERANK = SentenceTransformerRerank(
     model="cross-encoder/ms-marco-MiniLM-L-2-v2", top_n=3
 )
+RERANK.callback_manager = cb_manager
 
 class QueryMultiEngine(CustomQueryEngine):
     retrievers: list[BaseRetriever]
