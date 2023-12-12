@@ -28,5 +28,5 @@ else
 fi
 
 
-python3 -m llama_cpp.server --model $MODEL --n_gpu_layers 1 --verbose False
+python3 -m llama_cpp.server --model $MODEL --n_gpu_layers 1 --n_ctx 32768 --verbose False
 
