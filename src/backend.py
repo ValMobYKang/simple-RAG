@@ -54,7 +54,9 @@ class QueryMultiEngine(CustomQueryEngine):
 
 
 def service_context():
-    LLM = OpenAI(temperature=0.1, max_tokens=2048, stop=["</s>"],callback_manager=cb_manager)
+    LLM = OpenAI(
+        temperature=0.1, max_tokens=2048, stop=["</s>"], callback_manager=cb_manager
+    )
     EMBEDDING = HuggingFaceEmbedding(
         model_name="BAAI/bge-base-en-v1.5", callback_manager=cb_manager
     )
@@ -135,10 +137,11 @@ def get_query_engine(indices: list):
     mistral_qa_prompt = PromptTemplate(
         "<s>[INST] You will be presented with context. Your task is to answer the query only based on the context. "
         "If the context cannot answer the query, you responses 'I don't know' directly without any more responses. "
-        "Approach this task step-by-step, take your time. This is very important to my career.\n" 
+        "Approach this task step-by-step, take your time. This is very important to my career.\n"
         "The Context information is below. \n"
         "---------------------\n{context_str}\n--------------------- [/INST]</s>\n"
-        "[INST] {query_str} [/INST]")
+        "[INST] {query_str} [/INST]"
+    )
 
     if len(indices) == 1:
         return indices[0].as_query_engine(
