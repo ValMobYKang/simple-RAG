@@ -13,3 +13,4 @@ streamlit
 watchdog
 streamlit-authenticator
 sentence-transformers
+rank_bm25
