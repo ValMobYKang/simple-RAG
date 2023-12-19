@@ -1,20 +1,19 @@
+import base64
 import os
 import re
-import base64
-from typing import Dict
-import requests
+from dataclasses import dataclass
 from functools import lru_cache
+from typing import Dict, List, Optional
+
+import requests
 from llama_hub.confluence.base import ConfluenceReader as BaseConfluenceReader
+from llama_index.callbacks import CBEventType, EventPayload
 from llama_index.indices.postprocessor import (
     SentenceTransformerRerank as BaseSentenceTransformerRerank,
 )
-from typing import List, Optional
-from llama_index.callbacks import CBEventType, EventPayload
-from llama_index.schema import MetadataMode, NodeWithScore, QueryBundle
-from dataclasses import dataclass
-
 from llama_index.readers.base import BaseReader
 from llama_index.readers.schema.base import Document
+from llama_index.schema import MetadataMode, NodeWithScore, QueryBundle
 
 
 @dataclass
