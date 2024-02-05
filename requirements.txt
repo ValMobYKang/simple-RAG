@@ -9,8 +9,5 @@ arize-phoenix[experimental]
 docx2txt
 xlrd
 svglib
-streamlit
-watchdog
-streamlit-authenticator
 sentence-transformers
 rank_bm25
