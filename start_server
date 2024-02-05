@@ -18,7 +18,7 @@ if [ ! -f $MODEL ]; then
     echo "Model not found."
     check_answer "Do you want to download the model?"
     MODEL="./dolphin-2.1-mistral-7b.Q5_K_M.gguf"
-    wget "https://huggingface.co/TheBloke/dolphin-2.1-mistral-7B-GGUF/resolve/main/dolphin-2.1-mistral-7b.Q5_K_M.gguf"
+    wget "https://huggingface.co/TheBloke/Mixtral-8x7B-Instruct-v0.1-GGUF/blob/main/mixtral-8x7b-instruct-v0.1.Q3_K_M.gguf"
 fi
 
 # Check the Model file type
