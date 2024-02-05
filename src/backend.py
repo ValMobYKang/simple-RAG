@@ -102,7 +102,7 @@ def get_documents(
             max_num_results=10,
         )
     else:
-        raise Exception("Invalid Store")
+        raise Exception("Store name should be 'local_store', 'bitbucket_store' or 'confluence_store' ")
     return documents
 
 
