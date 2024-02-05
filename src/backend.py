@@ -10,11 +10,10 @@ from llama_index import (
     load_index_from_storage,
 )
 from llama_index.callbacks import CallbackManager
-from llama_index.core import BaseQueryEngine
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index.indices.base import BaseIndex
+from llama_index.llms import OpenAILike
 from llama_index.indices.prompt_helper import PromptHelper
-from llama_index.llms import OpenAI
 from llama_index.postprocessor.types import BaseNodePostprocessor
 from llama_index.prompts import PromptTemplate
 from llama_index.query_engine import CustomQueryEngine
@@ -22,7 +21,6 @@ from llama_index.response_synthesizers import BaseSynthesizer, get_response_synt
 from llama_index.retrievers import BaseRetriever, BM25Retriever
 from llama_index.schema import QueryBundle
 from phoenix.trace.llama_index import OpenInferenceTraceCallbackHandler
-
 from utils import BitbucketReader, ConfluenceReader, SentenceTransformerRerank
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
@@ -41,6 +39,7 @@ class QueryMultiEngine(CustomQueryEngine):
         nodes = []
         for retriever in self.retrievers:
             nodes += retriever.retrieve(query_str)
+
         for postprocessor in self.node_postprocessors:
             nodes = postprocessor.postprocess_nodes(
                 nodes=nodes, query_bundle=QueryBundle(query_str)
@@ -51,7 +50,7 @@ class QueryMultiEngine(CustomQueryEngine):
 
 def service_context():
     return ServiceContext.from_defaults(
-        llm=OpenAI(
+        llm=OpenAILike(
             temperature=0.1, max_tokens=2048, stop=["</s>"], callback_manager=CB_MANAGER
         ),
         chunk_size=512,
@@ -139,7 +138,7 @@ def get_bm25_retrievers(
     return retrievers
 
 
-def get_query_engine(indices: list[BaseIndex]) -> BaseQueryEngine:
+def get_query_engine(indices: list[BaseIndex]):
     RERANK = SentenceTransformerRerank(
         model="cross-encoder/ms-marco-MiniLM-L-2-v2", top_n=3
     )
@@ -185,14 +184,14 @@ def get_query_engine(indices: list[BaseIndex]) -> BaseQueryEngine:
         response_synthesizer=get_response_synthesizer(
             service_context=service_context(),
             response_mode="compact",
-            text_qa_template=dolphin_qa_prompt,
+            text_qa_template=mistral_qa_prompt,
         ),
         callback_manager=CB_MANAGER,
     )
 
 
 if __name__ == "__main__":
-    query_engine_bitbucket = get_query_engine(
+    query_engine = get_query_engine(
         indices=[
             init_index(persist_dir="local_store"),
         ]
@@ -200,4 +199,4 @@ if __name__ == "__main__":
 
     while 1:
         question = input("User query: ")
-        print(query_engine_bitbucket.query(question))
+        print(query_engine.query(question))
