@@ -64,9 +64,7 @@ def service_context():
 
 
 def get_documents(
-    input_dir: Literal[
-        "local_store", "confluence_store", "bitbucket_store"
-    ]
+    input_dir: Literal["local_store", "confluence_store", "bitbucket_store"]
 ):
     documents = None
     if input_dir == "local_store":
