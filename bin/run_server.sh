@@ -21,7 +21,7 @@ if [ ! -f $MODEL ]; then
     wget "https://huggingface.co/TheBloke/Mixtral-8x7B-Instruct-v0.1-GGUF/blob/main/mixtral-8x7b-instruct-v0.1.Q3_K_M.gguf"
 fi
 
-# Check the Model file type
+# Check the model file type
 filename=$(basename -- "$MODEL")
 if [[ "${filename##*.}" != "gguf" ]]; then 
     echo "Model suffix is not 'gguf'. Exiting."
@@ -56,5 +56,6 @@ if ! pip list 2>/dev/null | grep -q 'llama_cpp_python'; then
 fi
 
 # Execute
-python3 -m llama_cpp.server --model $MODEL --n_gpu_layers $GPU --n_ctx 32768 --verbose False
+echo "Start server now ..."
+python3 -m llama_cpp.server --model $MODEL --n_gpu_layers $GPU --n_ctx 20000 --verbose False
 

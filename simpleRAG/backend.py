@@ -22,6 +22,7 @@ from llama_index.retrievers import BaseRetriever, BM25Retriever
 from llama_index.schema import QueryBundle
 from phoenix.trace.llama_index import OpenInferenceTraceCallbackHandler
 from utils import BitbucketReader, ConfluenceReader, SentenceTransformerRerank
+from datetime import datetime
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 os.environ["OPENAI_API_BASE"] = "http://localhost:8000/v1"
@@ -163,13 +164,24 @@ def get_query_engine(indices: list[BaseIndex]):
         "[INST] {query_str} [/INST]"
     )
 
+    mistral_prompt = PromptTemplate(
+        "<s>[INST] Generate a comprehensive and informative answer (but no more than 80 words) for a given question solely based on the following context information."
+        "You must only use information from the provided search results."
+        "Use an unbiased and journalistic tone.\n"
+        f"Use this current date and time: {datetime.utcnow().strftime('%A, %B %d, %Y %H:%M:%S UTC')}."
+        "Combine search results together into a coherent answer"
+        "The Context information is below. \n"
+        "---------------------\n{context_str}\n--------------------- [/INST]</s>\n"
+        "[INST] {query_str} [/INST]"
+    )
+
     if len(indices) == 1:
         return indices[0].as_query_engine(
             similarity_top_k=5,
             service_context=service_context(),
             response_mode="compact",
             node_postprocessors=[RERANK],
-            text_qa_template=mistral_qa_prompt,
+            text_qa_template=mistral_prompt,
         )
 
     retrievers = get_bm25_retrievers(indices) + [
@@ -182,7 +194,7 @@ def get_query_engine(indices: list[BaseIndex]):
         response_synthesizer=get_response_synthesizer(
             service_context=service_context(),
             response_mode="compact",
-            text_qa_template=mistral_qa_prompt,
+            text_qa_template=mistral_prompt,
         ),
         callback_manager=CB_MANAGER,
     )
